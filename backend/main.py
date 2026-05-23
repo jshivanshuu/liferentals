@@ -1,5 +1,9 @@
 from fastapi import FastAPI
-app = FastAPI()
+from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+
+
+app = FastAPI(title = "houserentals", description = "A simple API for house rentals", version = "1.0.0")
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
