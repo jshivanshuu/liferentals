@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from .database import create_db_tables
-from .routes import admin, auth, properties, referrals, transactions
+from .routes import admin, auth, properties, transactions, wishlists
 
 
 @asynccontextmanager
@@ -21,7 +21,7 @@ app = FastAPI(
 app.include_router(auth.router)
 app.include_router(properties.router)
 app.include_router(transactions.router)
-app.include_router(referrals.router)
+app.include_router(wishlists.router)
 app.include_router(admin.router)
 
 @app.get("/")

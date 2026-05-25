@@ -23,12 +23,6 @@ class TransactionStatus(str, Enum):
     failed = "failed"
 
 
-class ReferralStatus(str, Enum):
-    pending = "pending"
-    rewarded = "rewarded"
-    rejected = "rejected"
-
-
 class UserCreate(BaseModel):
     email: str
     name: str
@@ -93,18 +87,13 @@ class Transaction(TransactionCreate):
         from_attributes = True
 
 
-class ReferralCreate(BaseModel):
+class WishlistCreate(BaseModel):
+    user_id: int
     property_id: int
-    landlord_id: int
-    tenant_id: int
-    monthly_rent: Decimal
 
 
-class Referral(ReferralCreate):
+class Wishlist(WishlistCreate):
     id: int
-    referred_by_user_id: int | None = None
-    status: ReferralStatus
-    end_date: datetime | None = None
     created_at: datetime
 
     class Config:

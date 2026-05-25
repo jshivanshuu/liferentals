@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from dotenv import load_dotenv
-from sqlalchemy import Column, DateTime, Integer, Numeric, String, create_engine
+from sqlalchemy import Column, DateTime, Integer, Numeric, String, UniqueConstraint, create_engine
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -75,17 +75,15 @@ class Transaction(Base):
     completed_at = Column(DateTime, nullable=True)
 
 
-class Referral(Base):
-    __tablename__ = "referrals"
+class Wishlist(Base):
+    __tablename__ = "wishlists"
+    __table_args__ = (
+        UniqueConstraint("user_id", "property_id", name="unique_user_property_wishlist"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
     property_id = Column(Integer, nullable=False, index=True)
-    landlord_id = Column(Integer, nullable=False, index=True)
-    tenant_id = Column(Integer, nullable=False, index=True)
-    referred_by_user_id = Column(Integer, nullable=True, index=True)
-    monthly_rent = Column(Numeric(12, 2), nullable=False)
-    status = Column(String(20), default="pending", nullable=False)
-    end_date = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
 
