@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from .. import database
 from ..schemas import Property, PropertyCreate, PropertyStatus
+from ..security import get_current_user
 
 router = APIRouter(prefix="/properties", tags=["properties"])
 
@@ -25,14 +26,16 @@ def list_properties(
 
 
 @router.post("", response_model=Property)
-def create_property(payload: PropertyCreate, db: Session = Depends(database.get_db)):
-    owner = db.query(database.User).filter(database.User.id == payload.owner_id).first()
-    if not owner:
-        raise HTTPException(status_code=404, detail="Owner not found")
-
+def create_property(
+    payload: PropertyCreate,
+    db: Session = Depends(database.get_db),
+    current_user: database.User = Depends(get_current_user),
+):
+    property_data = payload.model_dump()
     property_item = database.Property(
         status=PropertyStatus.pending.value,
-        **payload.dict(),
+        owner_id=current_user.id,
+        **property_data,
     )
     db.add(property_item)
     db.commit()

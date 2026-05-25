@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from dotenv import load_dotenv
-from sqlalchemy import Column, DateTime, Integer, Numeric, String, UniqueConstraint, create_engine
+from sqlalchemy import Column, DateTime, Integer, Numeric, String, UniqueConstraint, create_engine, inspect, text
 from sqlalchemy.engine import URL
 from sqlalchemy.orm import declarative_base, sessionmaker
 
@@ -41,6 +41,7 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     name = Column(String(100), nullable=False)
     phone = Column(String(30), nullable=False)
+    password_hash = Column(String(255), nullable=True)
     role = Column(String(20), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
@@ -89,6 +90,14 @@ class Wishlist(Base):
 
 def create_db_tables():
     Base.metadata.create_all(bind=engine)
+    ensure_user_password_column()
+
+
+def ensure_user_password_column():
+    columns = {column["name"] for column in inspect(engine).get_columns("users")}
+    if "password_hash" not in columns:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) NULL"))
 
 
 def get_db():

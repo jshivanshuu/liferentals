@@ -2,13 +2,11 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class UserRole(str, Enum):
     user = "user"
-    buyer = "buyer"
-    seller = "seller"
     admin = "admin"
 
 
@@ -28,20 +26,29 @@ class UserCreate(BaseModel):
     email: str
     name: str
     phone: str
-    role: UserRole
+    password: str
 
 
-class User(UserCreate):
+class User(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
+    email: str
+    name: str
+    phone: str
+    role: UserRole
     created_at: datetime
-
-    class Config:
-        orm_mode = True
-        from_attributes = True
 
 
 class LoginRequest(BaseModel):
     email: str
+    password: str
+
+
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: User
 
 
 class PropertyCreate(BaseModel):
@@ -54,17 +61,24 @@ class PropertyCreate(BaseModel):
     bedrooms: int
     bathrooms: int
     area: int
-    owner_id: int
 
 
-class Property(PropertyCreate):
+class Property(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
+    title: str
+    type: str
+    listing_type: str
+    price: Decimal
+    address: str
+    city: str
+    bedrooms: int
+    bathrooms: int
+    area: int
+    owner_id: int
     status: PropertyStatus
     created_at: datetime
-
-    class Config:
-        orm_mode = True
-        from_attributes = True
 
 
 class PropertyStatusUpdate(BaseModel):
@@ -73,30 +87,29 @@ class PropertyStatusUpdate(BaseModel):
 
 class TransactionCreate(BaseModel):
     property_id: int
-    buyer_id: int
-    seller_id: int
     amount: Decimal
 
 
-class Transaction(TransactionCreate):
+class Transaction(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
+    property_id: int
+    buyer_id: int
+    seller_id: int
+    amount: Decimal
     status: TransactionStatus
     completed_at: datetime | None = None
 
-    class Config:
-        orm_mode = True
-        from_attributes = True
-
 
 class WishlistCreate(BaseModel):
-    user_id: int
     property_id: int
 
 
-class Wishlist(WishlistCreate):
-    id: int
-    created_at: datetime
+class Wishlist(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        orm_mode = True
-        from_attributes = True
+    id: int
+    user_id: int
+    property_id: int
+    created_at: datetime
