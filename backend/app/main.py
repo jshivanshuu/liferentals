@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from .routes import admin, auth, properties, referrals, transactions
+from .database import create_db_tables
 
 app = FastAPI(
     title="Life Rentals API",
@@ -13,6 +14,11 @@ app.include_router(properties.router)
 app.include_router(transactions.router)
 app.include_router(referrals.router)
 app.include_router(admin.router)
+
+
+@app.on_event("startup")
+def startup():
+    create_db_tables()
 
 
 @app.get("/")

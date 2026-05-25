@@ -40,6 +40,10 @@ class User(UserCreate):
     id: int
     created_at: datetime
 
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
 
 class LoginRequest(BaseModel):
     email: str
@@ -63,6 +67,10 @@ class Property(PropertyCreate):
     status: PropertyStatus
     created_at: datetime
 
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
 
 class PropertyStatusUpdate(BaseModel):
     status: PropertyStatus
@@ -80,6 +88,10 @@ class Transaction(TransactionCreate):
     status: TransactionStatus
     completed_at: datetime | None = None
 
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
 
 class ReferralCreate(BaseModel):
     property_id: int
@@ -94,3 +106,7 @@ class Referral(ReferralCreate):
     status: ReferralStatus
     end_date: datetime | None = None
     created_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True

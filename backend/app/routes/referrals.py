@@ -1,6 +1,5 @@
-from datetime import datetime
-
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 from .. import database
 from ..schemas import Referral, ReferralCreate, ReferralStatus
@@ -9,26 +8,29 @@ router = APIRouter(prefix="/referrals", tags=["referrals"])
 
 
 @router.post("", response_model=Referral)
-def create_referral(payload: ReferralCreate):
-    if payload.property_id not in database.properties:
+def create_referral(payload: ReferralCreate, db: Session = Depends(database.get_db)):
+    property_item = db.query(database.Property).filter(database.Property.id == payload.property_id).first()
+    if not property_item:
         raise HTTPException(status_code=404, detail="Property not found")
 
-    if payload.landlord_id not in database.users:
+    landlord = db.query(database.User).filter(database.User.id == payload.landlord_id).first()
+    if not landlord:
         raise HTTPException(status_code=404, detail="Landlord not found")
 
-    if payload.tenant_id not in database.users:
+    tenant = db.query(database.User).filter(database.User.id == payload.tenant_id).first()
+    if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
 
-    referral = Referral(
-        id=database.next_id(database.referrals),
-        status=ReferralStatus.pending,
-        created_at=datetime.utcnow(),
+    referral = database.Referral(
+        status=ReferralStatus.pending.value,
         **payload.dict(),
     )
-    database.referrals[referral.id] = referral
+    db.add(referral)
+    db.commit()
+    db.refresh(referral)
     return referral
 
 
 @router.get("", response_model=list[Referral])
-def list_referrals():
-    return list(database.referrals.values())
+def list_referrals(db: Session = Depends(database.get_db)):
+    return db.query(database.Referral).all()
