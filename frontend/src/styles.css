@@ -618,3 +618,215 @@ td {
     white-space: nowrap;
   }
 }
+
+/* Profile Dropdown styles */
+.profile-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-trigger {
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 650;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-trigger:hover {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-trigger::after {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  margin-top: -3px;
+  transition: transform 0.2s ease;
+}
+
+.profile-dropdown-container.open .profile-trigger::after {
+  transform: rotate(-135deg);
+  margin-top: 3px;
+}
+
+.profile-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #e0e5ed;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(20, 33, 61, 0.15);
+  z-index: 1000;
+  padding: 16px;
+  color: #172033;
+  display: none;
+  animation: slideDown 0.2s ease;
+}
+
+.profile-dropdown-container.open .profile-dropdown-menu {
+  display: block;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-user-info {
+  border-bottom: 1px solid #edf0f5;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+.dropdown-user-info h4 {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  font-weight: 750;
+  color: #172033;
+}
+
+.dropdown-user-info p {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: #667085;
+}
+
+.dropdown-user-info span {
+  display: inline-block;
+  background: #e6f4ea;
+  color: #137333;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+}
+
+.dropdown-user-info span.admin {
+  background: #fce8e6;
+  color: #c5221f;
+}
+
+.dropdown-section-title {
+  font-size: 0.8rem;
+  font-weight: 850;
+  color: #667085;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.dropdown-wishlist {
+  max-height: 180px;
+  overflow-y: auto;
+  border-bottom: 1px solid #edf0f5;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+.dropdown-wishlist-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  border-bottom: 1px dashed #f1f5f9;
+}
+
+.dropdown-wishlist-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-wishlist-item span {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  color: #172033;
+}
+
+.dropdown-wishlist-item .price {
+  color: #0f766e;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.dropdown-wishlist-item .remove-btn {
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dropdown-wishlist-item .remove-btn:hover {
+  background: #fee2e2;
+}
+
+.dropdown-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dropdown-link-btn {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #46556b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dropdown-link-btn:hover {
+  background: #f1f5f9;
+  color: #0f766e;
+}
+
+.dropdown-logout-btn {
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  background: #fce8e6;
+  color: #c5221f;
+  margin-top: 6px;
+  transition: background 0.15s ease;
+}
+
+.dropdown-logout-btn:hover {
+  background: #f9d2ce;
+}
+

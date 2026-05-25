@@ -33,6 +33,7 @@ def add_to_wishlist(
     db.add(wishlist_item)
     db.commit()
     db.refresh(wishlist_item)
+    wishlist_item.property = property_item
     return wishlist_item
 
 
@@ -49,7 +50,10 @@ def list_user_wishlist(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return db.query(database.Wishlist).filter(database.Wishlist.user_id == user_id).all()
+    items = db.query(database.Wishlist).filter(database.Wishlist.user_id == user_id).all()
+    for item in items:
+        item.property = db.query(database.Property).filter(database.Property.id == item.property_id).first()
+    return items
 
 
 @router.delete("/{wishlist_id}")
@@ -67,3 +71,4 @@ def remove_from_wishlist(
     db.delete(wishlist_item)
     db.commit()
     return {"message": "Removed from wishlist"}
+

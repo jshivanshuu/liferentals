@@ -113,3 +113,4 @@ class Wishlist(BaseModel):
     user_id: int
     property_id: int
     created_at: datetime
+    property: Property | None = None

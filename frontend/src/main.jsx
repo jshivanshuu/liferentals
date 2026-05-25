@@ -1,6 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
+import Panel from "./components/Panel";
+import Metric from "./components/Metric";
+import PropertyForm from "./components/PropertyForm";
+import TransactionForm from "./components/TransactionForm";
+import PropertyGrid from "./components/PropertyGrid";
+import PropertySummary from "./components/PropertySummary";
+import Table from "./components/Table";
+import ProfileDropdown from "./components/ProfileDropdown";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -8,9 +16,6 @@ const baseNavItems = [
   { id: "explore", label: "Buy" },
   { id: "explore", label: "Rent" },
   { id: "list", label: "Sell" },
-  { id: "wishlist", label: "Wishlist" },
-  { id: "transactions", label: "Transactions" },
-  { id: "account", label: "Account" },
 ];
 
 const emptyProperty = {
@@ -59,13 +64,11 @@ function App() {
   const [loginPassword, setLoginPassword] = useState("");
   const [notice, setNotice] = useState({ type: "info", text: "Ready to connect to the LifeRentals API." });
   const [loading, setLoading] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const isAdmin = currentUser?.role === "admin";
 
-  const navItems = useMemo(
-    () => (isAdmin ? [...baseNavItems, { id: "admin", label: "Admin" }] : baseNavItems),
-    [isAdmin],
-  );
+  const navItems = baseNavItems;
 
   const filteredProperties = useMemo(
     () => properties.filter((property) => {
@@ -82,6 +85,22 @@ function App() {
   useEffect(() => {
     loadProperties();
   }, []);
+
+  useEffect(() => {
+    if (!isProfileDropdownOpen) return;
+
+    function handleDocumentClick(event) {
+      if (!event.target.closest(".profile-dropdown-container")) {
+        setIsProfileDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("click", handleDocumentClick);
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, [isProfileDropdownOpen]);
+
 
   useEffect(() => {
     if (!authToken || currentUser) return;
@@ -199,13 +218,11 @@ function App() {
         method: "POST",
         body: JSON.stringify(userForm),
       });
-    }, "Account created.");
+    }, "Registration successful.");
 
     if (auth) {
-      setAuthToken(auth.access_token);
-      localStorage.setItem("liferentals_token", auth.access_token);
-      setCurrentUser(auth.user);
       setUserForm(emptyUser);
+      setAuthMode("login");
     }
   }
 
@@ -379,32 +396,40 @@ function App() {
           {cityFilter || "Select city"}
         </button>
         <div className="topbar-actions">
-          <button
-            className="plain-link"
-            type="button"
-            onClick={() => {
-              setAuthMode("login");
-              setActiveView("account");
-            }}
-          >
-            {currentUser ? `${currentUser.name} #${currentUser.id}` : "Login"}
-          </button>
-          {!currentUser && (
-            <button
-              className="plain-link"
-              type="button"
-              onClick={() => {
-                setAuthMode("register");
-                setActiveView("account");
-              }}
-            >
-              Register
-            </button>
-          )}
-          {currentUser && (
-            <button className="plain-link" type="button" onClick={logout}>
-              Logout
-            </button>
+          {!currentUser ? (
+            <>
+              <button
+                className="plain-link"
+                type="button"
+                onClick={() => {
+                  setAuthMode("login");
+                  setActiveView("account");
+                }}
+              >
+                Login
+              </button>
+              <button
+                className="plain-link"
+                type="button"
+                onClick={() => {
+                  setAuthMode("register");
+                  setActiveView("account");
+                }}
+              >
+                Register
+              </button>
+            </>
+          ) : (
+            <ProfileDropdown
+              currentUser={currentUser}
+              isProfileDropdownOpen={isProfileDropdownOpen}
+              setIsProfileDropdownOpen={setIsProfileDropdownOpen}
+              wishlist={wishlist}
+              removeWishlist={removeWishlist}
+              currency={currency}
+              setActiveView={setActiveView}
+              logout={logout}
+            />
           )}
           <button className="post-pill" type="button" onClick={() => setActiveView("list")}>
             Post Property
@@ -461,22 +486,8 @@ function App() {
               </button>
             </div>
           )}
-          <div className="search-tabs">
-            {["buy", "rent"].map((tab) => (
-              <button
-                className={listingTypeFilter === tab ? "active" : ""}
-                key={tab}
-                type="button"
-                onClick={() => {
-                  setListingTypeFilter(tab);
-                  setActiveView("explore");
-                }}
-              >
-                {tab === "buy" ? "Buy" : "Rent"}
-              </button>
-            ))}
-            <button type="button" onClick={() => setActiveView("list")}>Post Property</button>
-          </div>
+
+
 
           <form className="search-bar" onSubmit={applyFilters}>
             <label>
@@ -533,7 +544,7 @@ function App() {
               <option value="rejected">Rejected</option>
             </select>
           </div>
-          <PropertyGrid properties={filteredProperties} onWishlist={addWishlist} onBuy={buyProperty} />
+          <PropertyGrid properties={filteredProperties} onWishlist={addWishlist} onBuy={buyProperty} currency={currency} />
         </section>
       )}
 
@@ -542,7 +553,7 @@ function App() {
           <Panel title="Submit a property">
             <PropertyForm form={propertyForm} setForm={setPropertyForm} onSubmit={createProperty} />
           </Panel>
-          <PropertyGrid properties={pendingProperties} compact onWishlist={addWishlist} onBuy={buyProperty} />
+          <PropertyGrid properties={pendingProperties} compact onWishlist={addWishlist} onBuy={buyProperty} currency={currency} />
         </section>
       )}
 
@@ -631,7 +642,7 @@ function App() {
           <div className="property-grid">
             {pendingProperties.map((property) => (
               <article className="property-card" key={property.id}>
-                <PropertySummary property={property} />
+                <PropertySummary property={property} currency={currency} />
                 <div className="card-actions">
                   <button type="button" onClick={() => updateStatus(property.id, "approved")}>Approve</button>
                   <button className="danger" type="button" onClick={() => updateStatus(property.id, "rejected")}>
@@ -707,124 +718,7 @@ function App() {
   );
 }
 
-function Panel({ title, children }) {
-  return (
-    <section className="panel">
-      <h2>{title}</h2>
-      {children}
-    </section>
-  );
-}
 
-function Metric({ label, value }) {
-  return (
-    <div className="metric">
-      <strong>{value}</strong>
-      <span>{label}</span>
-    </div>
-  );
-}
-
-function PropertyForm({ form, setForm, onSubmit }) {
-  return (
-    <form className="stack-form" onSubmit={onSubmit}>
-      <input placeholder="Title" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required />
-      <div className="form-row">
-        <input placeholder="Type" value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })} required />
-        <select value={form.listing_type} onChange={(event) => setForm({ ...form, listing_type: event.target.value })}>
-          <option value="rent">Rent</option>
-          <option value="sale">Sale</option>
-        </select>
-      </div>
-      <input placeholder="Address" value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} required />
-      <div className="form-row">
-        <input placeholder="City" value={form.city} onChange={(event) => setForm({ ...form, city: event.target.value })} required />
-        <input type="number" min="0" placeholder="Price" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} required />
-      </div>
-      <div className="form-row">
-        <input type="number" min="0" placeholder="Beds" value={form.bedrooms} onChange={(event) => setForm({ ...form, bedrooms: event.target.value })} required />
-        <input type="number" min="0" placeholder="Baths" value={form.bathrooms} onChange={(event) => setForm({ ...form, bathrooms: event.target.value })} required />
-        <input type="number" min="0" placeholder="Area" value={form.area} onChange={(event) => setForm({ ...form, area: event.target.value })} required />
-      </div>
-      <button type="submit">Submit listing</button>
-    </form>
-  );
-}
-
-function TransactionForm({ form, setForm, onSubmit }) {
-  return (
-    <form className="stack-form" onSubmit={onSubmit}>
-      <input type="number" min="1" placeholder="Property ID" value={form.property_id} onChange={(event) => setForm({ ...form, property_id: event.target.value })} required />
-      <input type="number" min="0" placeholder="Amount" value={form.amount} onChange={(event) => setForm({ ...form, amount: event.target.value })} required />
-      <button type="submit">Complete transaction</button>
-    </form>
-  );
-}
-
-function PropertyGrid({ properties, onWishlist, onBuy, compact = false }) {
-  if (!properties.length) {
-    return <div className="empty-state">No properties to show.</div>;
-  }
-
-  return (
-    <div className={`property-grid ${compact ? "compact" : ""}`}>
-      {properties.map((property) => (
-        <article className="property-card" key={property.id}>
-          <PropertySummary property={property} />
-          <div className="card-actions">
-            <button type="button" onClick={() => onBuy(property)}>
-              {property.listing_type === "rent" ? "Rent" : "Buy"}
-            </button>
-            <button type="button" onClick={() => onWishlist(property.id)}>Save</button>
-          </div>
-        </article>
-      ))}
-    </div>
-  );
-}
-
-function PropertySummary({ property }) {
-  return (
-    <>
-      <div className="card-topline">
-        <span>{property.type}</span>
-        <strong className={property.status}>{property.status}</strong>
-      </div>
-      <h3>{property.title}</h3>
-      <p>{property.address}, {property.city}</p>
-      <div className="property-meta">
-        <span>{property.bedrooms} bed</span>
-        <span>{property.bathrooms} bath</span>
-        <span>{property.area} sqft</span>
-      </div>
-      <div className="price-line">
-        <strong>{currency(property.price)}</strong>
-        <span>Owner #{property.owner_id}</span>
-      </div>
-    </>
-  );
-}
-
-function Table({ headers, rows }) {
-  if (!rows.length) return <div className="empty-state">Nothing here yet.</div>;
-
-  return (
-    <table>
-      <thead>
-        <tr>
-          {headers.map((header) => <th key={header}>{header}</th>)}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, index) => (
-          <tr key={index}>
-            {row.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  );
-}
 
 function currency(value) {
   return new Intl.NumberFormat("en-IN", {
