@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from .. import database
-from ..schemas import Property, PropertyCreate, PropertyStatus
+from ..schemas import Property, PropertyCreate
 from ..security import get_current_user
 
 router = APIRouter(prefix="/properties", tags=["properties"])
@@ -11,16 +11,12 @@ router = APIRouter(prefix="/properties", tags=["properties"])
 @router.get("", response_model=list[Property])
 def list_properties(
     city: str | None = None,
-    status: PropertyStatus | None = None,
     db: Session = Depends(database.get_db),
 ):
     query = db.query(database.Property)
 
     if city:
         query = query.filter(database.Property.city == city)
-
-    if status:
-        query = query.filter(database.Property.status == status.value)
 
     return query.all()
 
@@ -33,7 +29,6 @@ def create_property(
 ):
     property_data = payload.model_dump()
     property_item = database.Property(
-        status=PropertyStatus.pending.value,
         owner_id=current_user.id,
         **property_data,
     )

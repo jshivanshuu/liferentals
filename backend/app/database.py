@@ -59,7 +59,6 @@ class Property(Base):
     bedrooms = Column(Integer, nullable=False)
     bathrooms = Column(Integer, nullable=False)
     area = Column(Integer, nullable=False)
-    status = Column(String(20), default="pending", nullable=False)
     owner_id = Column(Integer, nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 

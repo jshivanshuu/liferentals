@@ -527,18 +527,6 @@ td button.danger {
   text-transform: uppercase;
 }
 
-.card-topline .approved {
-  background: #1d3557;
-}
-
-.card-topline .pending {
-  background: #ca8a04;
-}
-
-.card-topline .rejected {
-  background: #dc2626;
-}
-
 .property-card h3 {
   margin-bottom: 0;
   color: #172033;

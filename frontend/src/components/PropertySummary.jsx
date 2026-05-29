@@ -5,7 +5,6 @@ export default function PropertySummary({ property, currency }) {
     <>
       <div className="card-topline">
         <span>{property.type}</span>
-        <strong className={property.status}>{property.status}</strong>
       </div>
       <h3>{property.title}</h3>
       <p>{property.address}, {property.city}</p>

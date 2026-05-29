@@ -3,7 +3,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from .. import database
-from ..schemas import Property, PropertyStatus, PropertyStatusUpdate
+from ..schemas import Property
 from ..security import require_admin_user
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -22,7 +22,6 @@ def serialize_property(property_item: database.Property):
         "bathrooms": property_item.bathrooms,
         "area": property_item.area,
         "owner_id": property_item.owner_id,
-        "status": property_item.status,
         "created_at": property_item.created_at,
     }
 
@@ -39,16 +38,6 @@ def serialize_transaction(transaction: database.Transaction):
     }
 
 
-@router.get("/properties/pending", response_model=list[Property])
-def list_pending_properties(
-    db: Session = Depends(database.get_db),
-    current_user: database.User = Depends(require_admin_user),
-):
-    return (
-        db.query(database.Property)
-        .filter(database.Property.status == PropertyStatus.pending.value)
-        .all()
-    )
 
 
 @router.get("/properties", response_model=list[Property])
@@ -68,15 +57,6 @@ def get_analytics(
     return {
         "users": db.query(database.User).count(),
         "properties": db.query(database.Property).count(),
-        "pending_properties": db.query(database.Property)
-        .filter(database.Property.status == PropertyStatus.pending.value)
-        .count(),
-        "approved_properties": db.query(database.Property)
-        .filter(database.Property.status == PropertyStatus.approved.value)
-        .count(),
-        "rejected_properties": db.query(database.Property)
-        .filter(database.Property.status == PropertyStatus.rejected.value)
-        .count(),
         "transactions": db.query(database.Transaction).count(),
         "wishlist_items": db.query(database.Wishlist).count(),
         "revenue": float(total_revenue or 0),
@@ -102,18 +82,3 @@ def get_dashboard(
     }
 
 
-@router.patch("/properties/{property_id}/status", response_model=Property)
-def update_property_status(
-    property_id: int,
-    payload: PropertyStatusUpdate,
-    db: Session = Depends(database.get_db),
-    current_user: database.User = Depends(require_admin_user),
-):
-    property_item = db.query(database.Property).filter(database.Property.id == property_id).first()
-    if not property_item:
-        raise HTTPException(status_code=404, detail="Property not found")
-
-    property_item.status = payload.status.value
-    db.commit()
-    db.refresh(property_item)
-    return property_item

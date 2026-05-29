@@ -10,12 +10,6 @@ class UserRole(str, Enum):
     admin = "admin"
 
 
-class PropertyStatus(str, Enum):
-    pending = "pending"
-    approved = "approved"
-    rejected = "rejected"
-
-
 class TransactionStatus(str, Enum):
     pending = "pending"
     completed = "completed"
@@ -77,12 +71,7 @@ class Property(BaseModel):
     bathrooms: int
     area: int
     owner_id: int
-    status: PropertyStatus
     created_at: datetime
-
-
-class PropertyStatusUpdate(BaseModel):
-    status: PropertyStatus
 
 
 class TransactionCreate(BaseModel):
