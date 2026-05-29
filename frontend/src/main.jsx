@@ -240,6 +240,7 @@ function App() {
       localStorage.setItem("liferentals_token", auth.access_token);
       setCurrentUser(auth.user);
       setLoginPassword("");
+      setActiveView("explore");
     }
   }
 
@@ -391,9 +392,6 @@ function App() {
       <header className="topbar">
         <button className="brand" type="button" onClick={() => setActiveView("explore")}>
           LifeRentals
-        </button>
-        <button className="location-button" type="button" onClick={() => setActiveView("explore")}>
-          {cityFilter || "Select city"}
         </button>
         <div className="topbar-actions">
           {!currentUser ? (
@@ -657,61 +655,72 @@ function App() {
 
       {activeView === "account" && (
         <section className="content-section auth-section">
-          <Panel title={authMode === "login" ? "Sign in" : "Create account"}>
-            <div className="auth-switch">
-              <button
-                className={authMode === "login" ? "active" : ""}
-                type="button"
-                onClick={() => setAuthMode("login")}
-              >
-                Login
-              </button>
-              <button
-                className={authMode === "register" ? "active" : ""}
-                type="button"
-                onClick={() => setAuthMode("register")}
-              >
-                Register
-              </button>
-            </div>
-
-            {authMode === "register" ? (
-              <form className="stack-form" onSubmit={registerUser}>
-                <input placeholder="Name" value={userForm.name} onChange={(event) => setUserForm({ ...userForm, name: event.target.value })} required />
-                <input type="email" placeholder="Email" value={userForm.email} onChange={(event) => setUserForm({ ...userForm, email: event.target.value })} required />
-                <input placeholder="Phone" value={userForm.phone} onChange={(event) => setUserForm({ ...userForm, phone: event.target.value })} required />
-                <input type="password" placeholder="Password" value={userForm.password} onChange={(event) => setUserForm({ ...userForm, password: event.target.value })} required />
-                <button type="submit">Register</button>
-              </form>
-            ) : (
-              <form className="stack-form" onSubmit={login}>
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={loginEmail}
-                  onChange={(event) => setLoginEmail(event.target.value)}
-                  required
-                />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={loginPassword}
-                  onChange={(event) => setLoginPassword(event.target.value)}
-                  required
-                />
-                <button type="submit">Login</button>
-              </form>
-            )}
-
-            {currentUser && (
+          {currentUser ? (
+            <Panel title="My Profile">
               <div className="profile-card">
                 <span>{currentUser.role}</span>
                 <strong>{currentUser.name}</strong>
                 <small>{currentUser.email}</small>
+                {currentUser.phone && <small>{currentUser.phone}</small>}
                 <small>User ID: {currentUser.id}</small>
               </div>
-            )}
-          </Panel>
+              <button
+                className="danger"
+                style={{ marginTop: "16px", width: "100%" }}
+                type="button"
+                onClick={logout}
+              >
+                Logout
+              </button>
+            </Panel>
+          ) : (
+            <Panel title={authMode === "login" ? "Sign in" : "Create account"}>
+              <div className="auth-switch">
+                <button
+                  className={authMode === "login" ? "active" : ""}
+                  type="button"
+                  onClick={() => setAuthMode("login")}
+                >
+                  Login
+                </button>
+                <button
+                  className={authMode === "register" ? "active" : ""}
+                  type="button"
+                  onClick={() => setAuthMode("register")}
+                >
+                  Register
+                </button>
+              </div>
+
+              {authMode === "register" ? (
+                <form className="stack-form" onSubmit={registerUser}>
+                  <input placeholder="Name" value={userForm.name} onChange={(event) => setUserForm({ ...userForm, name: event.target.value })} required />
+                  <input type="email" placeholder="Email" value={userForm.email} onChange={(event) => setUserForm({ ...userForm, email: event.target.value })} required />
+                  <input placeholder="Phone" value={userForm.phone} onChange={(event) => setUserForm({ ...userForm, phone: event.target.value })} required />
+                  <input type="password" placeholder="Password" value={userForm.password} onChange={(event) => setUserForm({ ...userForm, password: event.target.value })} required />
+                  <button type="submit">Register</button>
+                </form>
+              ) : (
+                <form className="stack-form" onSubmit={login}>
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={loginEmail}
+                    onChange={(event) => setLoginEmail(event.target.value)}
+                    required
+                  />
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={loginPassword}
+                    onChange={(event) => setLoginPassword(event.target.value)}
+                    required
+                  />
+                  <button type="submit">Login</button>
+                </form>
+              )}
+            </Panel>
+          )}
         </section>
       )}
     </main>

@@ -64,14 +64,12 @@ select:focus {
   letter-spacing: 0;
 }
 
-.location-button,
 .plain-link {
   color: #ffffff;
   font-size: 1.05rem;
   font-weight: 650;
 }
 
-.location-button::after,
 .plain-link::after,
 .category-nav button::after {
   content: "";
