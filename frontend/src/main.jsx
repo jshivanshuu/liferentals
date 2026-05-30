@@ -38,6 +38,14 @@ const emptyUser = {
   role: "user",
 };
 
+const QUOTES = [
+  { text: "The magic thing about home is that it feels good to leave, and it feels even better to come back.", author: "Wendy Wunder" },
+  { text: "Your home should tell the story of who you are, and be a collection of what you love.", author: "Nate Berkus" },
+  { text: "A house is made of bricks and beams. A home is made of hopes and dreams.", author: "Unknown" },
+  { text: "Find your next chapter, one rental at a time.", author: "LifeRentals" },
+  { text: "Home is not a place, it's a feeling.", author: "Unknown" },
+];
+
 function App() {
   const [activeView, setActiveView] = useState("explore");
   const [authMode, setAuthMode] = useState("login");
@@ -63,6 +71,20 @@ function App() {
   const [notice, setNotice] = useState({ type: "info", text: "Ready to connect to the LifeRentals API." });
   const [loading, setLoading] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
+  const [fadeQuote, setFadeQuote] = useState(true);
+
+  useEffect(() => {
+    if (activeView !== "explore") return;
+    const interval = setInterval(() => {
+      setFadeQuote(false);
+      setTimeout(() => {
+        setCurrentQuoteIndex((prevIndex) => (prevIndex + 1) % QUOTES.length);
+        setFadeQuote(true);
+      }, 400);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [activeView]);
 
   const isAdmin = currentUser?.role === "admin";
 
@@ -432,6 +454,10 @@ function App() {
       {activeView === "explore" && (
         <section className="hero-search">
           <h1>Start your LifeRentals journey</h1>
+          <div className={`hero-quote-container ${fadeQuote ? "fade-in" : "fade-out"}`}>
+            <p className="hero-quote-text">“{QUOTES[currentQuoteIndex].text}”</p>
+            <span className="hero-quote-author">— {QUOTES[currentQuoteIndex].author}</span>
+          </div>
           {!currentUser && (
             <div className="hero-auth-actions">
               <button
